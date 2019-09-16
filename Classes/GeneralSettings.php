@@ -23,7 +23,7 @@ class GeneralSettings
 
     public static function getLogErrorTypes()
     {
-        return array_values(self::error_levels);
+        return array_values(self::$error_levels);
     }
 
     public static function getErrorName($code)

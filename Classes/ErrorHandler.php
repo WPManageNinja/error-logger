@@ -15,23 +15,25 @@ class ErrorHandler
         if (is_null($error)) {
             return;
         }
-
         $ignore = apply_filters('ninja_error_log_will_by_pass', false, $error);
+
         if ($ignore) {
-            return;
+         //   return;
         }
 
         $errorType = $error['type'];
+
         $emailLogTypes = GeneralSettings::getEmailBroadCastErrorTypes();
         $dbLogErrorTypes = GeneralSettings::getDbStropeErrorTypes();
 
         $willSendEmail = in_array($errorType, $emailLogTypes);
         $willLogInDB = in_array($errorType, $dbLogErrorTypes);
 
+        $willLogInDB = true; // For dev purpose now
+
         if(!$willSendEmail && !$willLogInDB) {
             return;
         }
-
         $logData = [
             'log_type'       => GeneralSettings::getErrorName($error['type']),
             'log_data'       => $error['message'],

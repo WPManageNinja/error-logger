@@ -13,6 +13,7 @@ class AjaxHandler
 
         $perPage = 20;
         $logs = ninja_error_logger_app()->db()->table('nel_error_logs')
+                    ->orderBy('id', 'DESC')
                     ->paginate($perPage);
 
         $this->sendSuccess([
