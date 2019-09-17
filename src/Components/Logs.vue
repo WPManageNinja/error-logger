@@ -1,21 +1,23 @@
 <template>
     <div>
         <el-row>
-            <el-form>
-                <el-col :span="4">
-                    <el-form-item>
-                        <el-select v-model="value" placeholder="Type">
-                            <el-option v-for="item in logs" :key= "item.log_type" :label= "item.log_type" :value= "item.log_type">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                </el-col>
-                <el-col :span="4">
-                    <el-form-item>
-                        <el-input placeholder="Search in logs" prefix-icon="el-icon-search"></el-input>
-                    </el-form-item>
-                </el-col>
-            </el-form>
+            <el-col>
+                <el-form>
+                    <el-col :span="4">
+                        <el-form-item>
+                            <el-select v-model="value" placeholder="Type">
+                                <el-option v-for="item in logs" :key= "item.log_type" :label= "item.log_type" :value= "item.log_type">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="4">
+                        <el-form-item>
+                            <el-input placeholder="Search in logs" prefix-icon="el-icon-search"></el-input>
+                        </el-form-item>
+                    </el-col>
+                </el-form>
+            </el-col>
             <el-col>
                 <el-table :data="logs" border style="width: 100%">
                     <el-table-column type="index" label="Id" width="80">
