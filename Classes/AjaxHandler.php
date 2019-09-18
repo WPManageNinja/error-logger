@@ -29,15 +29,31 @@ class AjaxHandler
     public function saveNotificationSettings()
     {
         // Save Your Notification Settings here
+        $email = $_POST['email'];
+
+        if( null == get_option('notification_email','') ){
+            add_option('notification_email',$email);
+        }else{
+            update_option('notification_email',$email);
+        }
+
+        $this->sendSuccess([
+            'success' => 'successfully save data',
+            'email'    => $email,  
+        ]);
+
     }
 
     public function getNotificationSettings()
     {
+        $email = get_option('notification_email','');
+
         $data = [
             'error_levels' => GeneralSettings::$error_levels,
             'email_log_types' => GeneralSettings::getEmailBroadCastErrorTypes(),
             'db_log_types' => GeneralSettings::getDbStropeErrorTypes(),
-            'email_settings' => GeneralSettings::getEmailSettings()
+            'email_settings' => GeneralSettings::getEmailSettings(),
+            'email' => $email
         ];
 
         $this->sendSuccess($data);

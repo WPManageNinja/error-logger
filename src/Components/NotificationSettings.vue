@@ -7,7 +7,7 @@
                 </el-col>
                 <el-col>
                     <label>Email to :</label>
-                    <input type="text" Placeholder="Email" />
+                    <input type="text" Placeholder="Email" v-model="email"/>
                 </el-col>
             </el-row>
         </el-container>
@@ -41,7 +41,7 @@
 
         <el-row>
             <div class="btn-save">
-                <el-button type="success" size="mini">Save</el-button>
+                <el-button type="success" size="mini" @click.prevent="saveSettings">Save</el-button>
             </div>
         </el-row>
            
@@ -58,8 +58,38 @@
                 checkList2: ['selected and disabled', 'Option A'],
                 error_names: [
                     'E_ERROR', 'E_WARNING', 'E_PARSE', 'E_NOTICE', 'E_CORE_ERROR', 'E_CORE_WARNING', 'E_COMPILE_ERROR', 'E_COMPILE_WARNING', 'E_USER_ERROR', 'E_USER_WARNING', 'E_USER_NOTICE', 'E_STRICT', 'E_RECOVERABLE_ERROR', 'E_DEPRECATED', 'E_USER_DEPRECATED'
-                ]
+                ],
+                email: ''
             };
+        },
+
+        methods: {
+            saveSettings() {
+                this.$post('save_notification_settings', {
+                    name: 'Donald Duck',
+                    value: 'Duckburg',
+                    email: this.email
+                }).then(response => {
+                    console.log(response);
+                });
+
+                console.log('ok dude');
+            },
+            getNotifactionSettings() {
+                this.$get('get_notification_settings')
+                    .then(response => {
+                        this.email = response.data.email;
+                        console.log(response.data.email);
+                    })
+                    .fail(error => {
+                        // handle error here
+                        console.log(error);
+                    })
+            }
+        },
+
+        mounted() {
+            this.getNotifactionSettings();
         }
     }
 </script>

@@ -19,25 +19,22 @@
                 </el-form>
             </el-col>
             <el-col>
-                <el-table :data="logs" border style="width: 100%">
-                    <el-table-column type="index" label="Id" width="80">
-                        
+                <el-table :data="logs" style="width: 100%">
+                    <el-table-column type="expand">
+                        <template slot-scope="props">
+                            <p><strong>About Log Data : </strong>{{ props.row.log_data }}</p>
+                            <p><strong>Log Type : </strong>{{ props.row.log_type }}</p>
+                            <p><strong>Method : </strong>{{ props.row.request_method }}</p>
+                            <p><strong>Created At : </strong>{{ props.row.created_at }}</p>
+                        </template>
                     </el-table-column>
-
-                    <el-table-column prop="log_data" label="log data" width="500">
-
+                    <el-table-column label="Id" type="index">
                     </el-table-column>
-
-                    <el-table-column prop="request_method" label="request method">
-
-                    </el-table-column>
-
-                    <el-table-column  prop="created_at" label="created at">
-
-                    </el-table-column>
-
                     <el-table-column prop="log_type" label="type">
-
+                    </el-table-column>
+                    <el-table-column prop="request_method" label="request method">
+                    </el-table-column>
+                    <el-table-column prop="created_at" label="created at">
                     </el-table-column>
                 </el-table>
 
@@ -56,6 +53,10 @@
     .pagination-section{
         margin-top:20px;
         float: right;
+    }
+
+    div.cell{
+        text-align: center;
     }
 
 </style>
