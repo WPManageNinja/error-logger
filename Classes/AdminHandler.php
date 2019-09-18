@@ -16,7 +16,8 @@ class AdminHandler
             'get_logs'                   => 'getLogs',
             'delete_logs'                => 'deleteLogs',
             'save_notification_settings' => 'saveNotificationSettings',
-            'get_notification_settings'  => 'getNotificationSettings'
+            'get_notification_settings'  => 'getNotificationSettings',
+            'get_search_data'            => 'getSearchData',
         ];
 
         if (current_user_can($this->getAccessRole())) {

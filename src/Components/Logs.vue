@@ -13,7 +13,8 @@
                     </el-col>
                     <el-col :span="4">
                         <el-form-item>
-                            <el-input placeholder="Search in logs" prefix-icon="el-icon-search"></el-input>
+                            <input placeholder="Search in logs" @keyup="searchData" v-model="input_search" />
+                            <!-- <input placeholder="Please input" @keyup="searchData" prefix-icon="el-icon-search" v-model="input_search" /> -->
                         </el-form-item>
                     </el-col>
                 </el-form>
@@ -66,6 +67,7 @@
         name: 'error_log_logs',
         data() {
             return {
+                input_search: '',
                 logs: [],
                 total_logs: 0,
                 per_page: 20,
@@ -100,6 +102,15 @@
                     .always(() => {
                         this.fetching = false;
                     });
+            },
+
+            searchData() {
+                this.$post('get_search_data', {
+                    search: this.input_search
+                }).then(response => {
+                    console.log(response.data.logs);
+                    this.logs = response.data.logs;
+                });
             }
         },
         mounted() {

@@ -44,6 +44,24 @@ class AjaxHandler
 
     }
 
+    public function getSearchData(){
+
+        //get search data here
+        $searchInput = $_POST['search'];
+        $logs = ninja_error_logger_app()->db()->table('nel_error_logs')
+                    ->where('log_data', 'like', '%' . $searchInput . '%')
+                    ->orWhere('log_type', 'like', '%' . $searchInput . '%')
+                    ->orWhere('request_method', 'like', '%' . $searchInput . '%')
+                    ->orderBy('id', 'DESC')
+                    ->get();
+
+        $this->sendSuccess([
+            'success'       => 'data found successfully',
+            'searchInput'   => $searchInput,
+            'logs'          => $logs
+        ]);
+    }
+
     public function getNotificationSettings()
     {
         $email = get_option('notification_email','');
