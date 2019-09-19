@@ -5,7 +5,7 @@
                 <el-form>
                     <el-col :span="4">
                         <el-form-item>
-                            <el-select v-model="filterValue" placeholder="Type">
+                            <el-select v-model="filterValue" placeholder="Type" @change="selectItem">
                                 <el-option v-for="item in error_levels" :key= "item" :label= "item" :value= "item"></el-option>
                             </el-select>
                         </el-form-item>
@@ -82,6 +82,17 @@
             }
         },
         methods: {
+            selectItem() {
+                console.log('i m pressed ' + this.filterValue);
+                this.$post('get_logs', {
+                    search: this.input_search,
+                    select_filter: this.filterValue
+                })
+                    .then(response => {
+                        this.logs = response.data.logs.data;
+                        console.log(response);
+                    })
+            },
             getLogs() {
                 this.fetching = true;
                 this.$get('get_logs', {
@@ -95,7 +106,6 @@
                         this.per_page = response.data.logs.per_page;
                         this.page = response.data.logs.current_page;
                         this.error_levels = Object.keys(response.data.error_levels);  
-                        console.log(this.error_levels);
                     })
                     .fail(error => {
                         // handle error here
@@ -107,10 +117,11 @@
             },
 
             searchData() {
-                this.$post('get_search_data', {
-                    search: this.input_search
+                this.$post('get_logs', {
+                    search: this.input_search,
+                    select_filter: this.filterValue
                 }).then(response => {
-                    console.log(response.data.logs);
+                    console.log(response);
                     this.logs = response.data.logs;
                 });
             }
