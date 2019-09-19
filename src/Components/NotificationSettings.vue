@@ -19,9 +19,9 @@
                 </el-col>
 
                 <el-col>
-                    <ul class="myclass">
-                        <li v-for="name in error_names" :label="name" :key="name"><input type="checkbox"><span> {{name}}</span></li>
-                    </ul>
+                    <el-checkbox-group v-model="checkList1">
+                        <el-checkbox  v-for="name in error_lavels" :label="name" :key="name" style="display:block;margin-top:10px;"></el-checkbox>
+                    </el-checkbox-group>
                 </el-col>
             </el-row>
         </el-container>
@@ -32,9 +32,9 @@
                     <h3>Database Logs Settings :</h3>
                 </el-col>
                 <el-col>
-                    <ul class="myclass">
-                        <li v-for="name in error_names" :label="name" :key="name"><input type="checkbox"><span> {{name}}</span></li>
-                    </ul>
+                    <el-checkbox-group v-model="checkList2">
+                        <el-checkbox  v-for="name in error_lavels" :label="name" :key="name" style="display:block;margin-top:10px;">{{name}}</el-checkbox>
+                    </el-checkbox-group>
                 </el-col>
             </el-row>
         </el-container>
@@ -55,31 +55,40 @@
         data() {
             return {
                 checkList1: [],
-                checkList2: ['selected and disabled', 'Option A'],
-                error_names: [
-                    'E_ERROR', 'E_WARNING', 'E_PARSE', 'E_NOTICE', 'E_CORE_ERROR', 'E_CORE_WARNING', 'E_COMPILE_ERROR', 'E_COMPILE_WARNING', 'E_USER_ERROR', 'E_USER_WARNING', 'E_USER_NOTICE', 'E_STRICT', 'E_RECOVERABLE_ERROR', 'E_DEPRECATED', 'E_USER_DEPRECATED'
-                ],
-                email: ''
+                checkList2: [],
+                email: '',
+                error_lavels: []
             };
         },
 
         methods: {
             saveSettings() {
                 this.$post('save_notification_settings', {
-                    name: 'Donald Duck',
-                    value: 'Duckburg',
-                    email: this.email
+                    email: this.email,
+                    notification_type_settings: this.checkList1,
+                    database_logs_settings: this.checkList2
                 }).then(response => {
                     console.log(response);
                 });
 
-                console.log('ok dude');
+                console.log(this.checkList1);
             },
             getNotifactionSettings() {
                 this.$get('get_notification_settings')
                     .then(response => {
-                        this.email = response.data.email;
-                        console.log(response.data.email);
+                        let dbEmail = response.data.email_settings.db_email_to;
+                        if (dbEmail) {
+                            this.email = response.data.email_settings.db_email_to;
+                        } else {
+                            this.email = response.data.email_settings.email_to;
+                        }                        
+                        this.error_lavels = Object.keys(response.data.error_levels);    
+                        if (response.data.notification_settings) {
+                            this.checkList1 = response.data.notification_settings;
+                        }                   
+                        if (response.data.database_settings) {
+                            this.checkList2 = response.data.database_settings;
+                        } 
                     })
                     .fail(error => {
                         // handle error here

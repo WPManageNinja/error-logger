@@ -5,16 +5,15 @@
                 <el-form>
                     <el-col :span="4">
                         <el-form-item>
-                            <el-select v-model="value" placeholder="Type">
-                                <el-option v-for="item in logs" :key= "item.log_type" :label= "item.log_type" :value= "item.log_type">
-                                </el-option>
+                            <el-select v-model="filterValue" placeholder="Type">
+                                <el-option v-for="item in error_levels" :key= "item" :label= "item" :value= "item"></el-option>
                             </el-select>
                         </el-form-item>
                     </el-col>
                     <el-col :span="4">
                         <el-form-item>
+                            <!-- <el-input placeholder="Search in logs" prefix-icon="el-icon-search" @keyup.enter="searchData" v-model="input_search"></el-input> -->
                             <input placeholder="Search in logs" @keyup="searchData" v-model="input_search" />
-                            <!-- <input placeholder="Please input" @keyup="searchData" prefix-icon="el-icon-search" v-model="input_search" /> -->
                         </el-form-item>
                     </el-col>
                 </el-form>
@@ -78,7 +77,8 @@
                     user: '',
                     region: ''
                 },
-                value: ''               
+                filterValue: '',
+                error_levels: []               
             }
         },
         methods: {
@@ -94,6 +94,8 @@
                         this.total_logs = response.data.logs.total;
                         this.per_page = response.data.logs.per_page;
                         this.page = response.data.logs.current_page;
+                        this.error_levels = Object.keys(response.data.error_levels);  
+                        console.log(this.error_levels);
                     })
                     .fail(error => {
                         // handle error here

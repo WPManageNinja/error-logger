@@ -17,7 +17,8 @@ class AjaxHandler
                     ->paginate($perPage);
 
         $this->sendSuccess([
-            'logs' => $logs
+            'logs' => $logs,
+            'error_levels' => GeneralSettings::$error_levels,
         ]);
     }
 
@@ -29,17 +30,19 @@ class AjaxHandler
     public function saveNotificationSettings()
     {
         // Save Your Notification Settings here
-        $email = $_POST['email'];
+        $email = sanitize_email($_POST['email']);
+        $notification_type_settings = $_POST['notification_type_settings'];
+        $database_logs_settings     = $_POST['database_logs_settings'];
 
-        if( null == get_option('notification_email','') ){
-            add_option('notification_email',$email);
-        }else{
-            update_option('notification_email',$email);
-        }
+        update_option('nel_email_settings',$email);  
+        update_option('ninja_notification_type_settings',$notification_type_settings);      
+        update_option('ninja_database_logs_settings',$database_logs_settings);      
 
         $this->sendSuccess([
-            'success' => 'successfully save data',
-            'email'    => $email,  
+            'success'                => 'successfully save data',
+            'email'                  => $email,  
+            'notification_types_settings'=> $notification_type_settings,
+            'database_logs_settings' => $database_logs_settings,
         ]);
 
     }
@@ -64,14 +67,14 @@ class AjaxHandler
 
     public function getNotificationSettings()
     {
-        $email = get_option('notification_email','');
-
         $data = [
             'error_levels' => GeneralSettings::$error_levels,
             'email_log_types' => GeneralSettings::getEmailBroadCastErrorTypes(),
             'db_log_types' => GeneralSettings::getDbStropeErrorTypes(),
             'email_settings' => GeneralSettings::getEmailSettings(),
-            'email' => $email
+            'email' => $email,
+            'notification_settings' => get_option('ninja_notification_type_settings'),
+            'database_settings'     => get_option('ninja_database_logs_settings')
         ];
 
         $this->sendSuccess($data);

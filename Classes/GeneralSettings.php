@@ -23,7 +23,7 @@ class GeneralSettings
 
     public static function getLogErrorTypes()
     {
-        return array_values(self::$error_levels);
+        return self::$error_levels;
     }
 
     public static function getErrorName($code)
@@ -73,6 +73,10 @@ class GeneralSettings
         $emailSettings = get_option('nel_email_settings');
         if(!$emailSettings) {
             $emailSettings = [];
+        }else{
+            $emailSettings = [
+                'db_email_to' => $emailSettings
+            ];
         }
 
         return wp_parse_args($emailSettings, $defaults);
