@@ -69,7 +69,7 @@
                 input_search: '',
                 logs: [],
                 total_logs: 0,
-                per_page: 20,
+                per_page: 5,
                 page: 1,
                 search: '',
                 fetching: false,
@@ -89,11 +89,11 @@
                     value: val
                 })
                     .then(response => {
-                        this.logs = response.data.logs.data;
-                        this.total_logs = response.data.logs.total;
-                        this.per_page = response.data.logs.per_page;
-                        this.page = response.data.logs.current_page;
-                        this.total_data = response.data.total_count; 
+                        this.logs = response.data.logs;
+                        // this.total_logs = response.data.logs.total;
+                        // this.per_page = response.data.logs.per_page;
+                        // this.page = response.data.logs.current_page;
+                        // this.total_data = response.data.total_count; 
                         console.log(response);
                     })
             },
@@ -104,10 +104,10 @@
                     select_filter: this.filterValue
                 })
                     .then(response => {
-                        this.logs = response.data.logs.data;
-                        this.total_logs = response.data.logs.total;
-                        this.per_page = response.data.logs.per_page;
-                        this.page = response.data.logs.current_page;
+                        this.logs = response.data.logs;
+                        // this.total_logs = response.data.logs.total;
+                        // this.per_page = response.data.logs.per_page;
+                        // this.page = response.data.logs.current_page;
                         console.log(this.logs);
                     })
             },
@@ -119,7 +119,7 @@
                     per_page: this.per_page
                 })
                     .then(response => {
-                        this.logs = response.data.logs.data;
+                        this.logs = response.data.logs;
                         this.total_logs = response.data.logs.total;
                         this.per_page = response.data.logs.per_page;
                         this.page = response.data.logs.current_page;
@@ -141,11 +141,11 @@
                     search: this.input_search,
                     select_filter: this.filterValue
                 }).then(response => { 
-                    this.logs = response.data.logs.data;
-                    this.total_logs = response.data.logs.total;
-                    this.per_page = response.data.logs.per_page;
-                    this.page = response.data.logs.current_page;
-                    this.logs = response.data.logs.data;
+                    this.logs = response.data.logs;
+                    // this.total_logs = response.data.logs.total;
+                    // this.per_page = 5;
+                    // this.page = response.data.logs.current_page;
+                    // this.logs = response.data.logs.data;
                     console.log(response);
                 });
             }

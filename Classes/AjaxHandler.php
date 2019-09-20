@@ -21,12 +21,20 @@ class AjaxHandler
         
         if( $filter_data && $searchInput ){
 
-            $logs = ninja_error_logger_app()->db()->table('nel_error_logs')                  
-                    ->where('log_data', 'like', '%' . $searchInput . '%') 
-                    ->andWhere('log_type', '=',  $error_levels[$filter_data] ) 
-                    ->orWhere('request_method', 'like', '%' . $searchInput . '%')    
-                    ->orderBy('id', 'DESC')   
-                    ->paginate($perPage);  
+            global $wpdb;
+          $nel_error_logs = $wpdb->prefix . 'nel_error_logs';
+
+          $logs = $wpdb->get_results(
+                "SELECT * FROM $nel_error_logs 
+                where (log_data LIKE '%$searchInput%' OR request_method LIKE '%$searchInput%' ) 
+                AND log_type=$error_levels[$filter_data]"); 
+
+            // $logs = ninja_error_logger_app()->db()->table('nel_error_logs')                  
+            //         ->where('log_data', 'like', '%' . $searchInput . '%') 
+            //         ->andWhere('log_type', '=',  $error_levels[$filter_data] ) 
+            //         ->orWhere('request_method', 'like', '%' . $searchInput . '%')    
+            //         ->orderBy('id', 'DESC')   
+            //         ->paginate($perPage);  
                     
                     //->andWhere('log_type', '=',  $error_levels[$filter_data] ) 
 
@@ -50,7 +58,7 @@ class AjaxHandler
             ->paginate($perPage);
             
             $this->sendSuccess([
-                'logs' => $logs,
+                'logs' => $logs['data'],
                 'searchdata' => $filter_data,
                 'error_levels' => $error_levels[$filter_data],
                 'errors' => $error_levels,
@@ -67,7 +75,7 @@ class AjaxHandler
             ->paginate($perPage);
 
             $this->sendSuccess([
-                'logs' => $logs,
+                'logs' => $logs['data'],
                 'errors' => $error_levels,
                 'success' => 'search data find successfully'
             ]);
@@ -81,7 +89,7 @@ class AjaxHandler
             $total = count(ninja_error_logger_app()->db()->table('nel_error_logs')->get());
 
             $this->sendSuccess([
-                'logs' => $logs,
+                'logs' => $logs['data'],
                 'error_levels' => $error_levels,
                 'total_count' => $total,
             ]);
