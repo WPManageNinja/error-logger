@@ -652,6 +652,24 @@ class QueryBuilderHandler
      *
      * @return $this
      */
+    public function andWhere($key, $operator = null, $value = null)
+    {
+        // If two params are given then assume operator is =
+        if (func_num_args() == 2) {
+            $value = $operator;
+            $operator = '=';
+        }
+
+        return $this->whereHandler($key, $operator, $value, 'AND');
+    }
+
+    /**
+     * @param $key
+     * @param $operator
+     * @param $value
+     *
+     * @return $this
+     */
     public function whereNot($key, $operator = null, $value = null)
     {
         // If two params are given then assume operator is =

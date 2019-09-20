@@ -28,7 +28,7 @@
                             <p><strong>Created At : </strong>{{ props.row.created_at }}</p>
                         </template>
                     </el-table-column>
-                    <el-table-column label="Id" type="index">
+                    <el-table-column label="Id" prop="id">
                     </el-table-column>
                     <el-table-column prop="log_type" label="type">
                     </el-table-column>
@@ -39,7 +39,7 @@
                 </el-table>
 
                 <div class="pagination-section">
-                    <el-pagination background layout="prev, pager, next" :total="total_logs">
+                    <el-pagination background layout="prev, pager, next" :current-page="page" :page-size="per_page" @current-change="handleCurrentChange" :total="total_data">
                     </el-pagination>
                 </div>
             </el-col>
@@ -78,10 +78,25 @@
                     region: ''
                 },
                 filterValue: '',
-                error_levels: []               
+                error_levels: [],
+                total_data: 0               
             }
         },
         methods: {
+            handleCurrentChange(val) {
+                console.log(val);
+                this.$post('get_logs_pagination', {
+                    value: val
+                })
+                    .then(response => {
+                        this.logs = response.data.logs.data;
+                        this.total_logs = response.data.logs.total;
+                        this.per_page = response.data.logs.per_page;
+                        this.page = response.data.logs.current_page;
+                        this.total_data = response.data.total_count; 
+                        console.log(response);
+                    })
+            },
             selectItem() {
                 console.log('i m pressed ' + this.filterValue);
                 this.$post('get_logs', {
@@ -90,7 +105,10 @@
                 })
                     .then(response => {
                         this.logs = response.data.logs.data;
-                        console.log(response);
+                        this.total_logs = response.data.logs.total;
+                        this.per_page = response.data.logs.per_page;
+                        this.page = response.data.logs.current_page;
+                        console.log(this.logs);
                     })
             },
             getLogs() {
@@ -105,7 +123,9 @@
                         this.total_logs = response.data.logs.total;
                         this.per_page = response.data.logs.per_page;
                         this.page = response.data.logs.current_page;
-                        this.error_levels = Object.keys(response.data.error_levels);  
+                        this.error_levels = Object.keys(response.data.error_levels); 
+                        this.total_data = response.data.total_count; 
+                        console.log(response);
                     })
                     .fail(error => {
                         // handle error here
@@ -120,9 +140,13 @@
                 this.$post('get_logs', {
                     search: this.input_search,
                     select_filter: this.filterValue
-                }).then(response => {
+                }).then(response => { 
+                    this.logs = response.data.logs.data;
+                    this.total_logs = response.data.logs.total;
+                    this.per_page = response.data.logs.per_page;
+                    this.page = response.data.logs.current_page;
+                    this.logs = response.data.logs.data;
                     console.log(response);
-                    this.logs = response.data.logs;
                 });
             }
         },

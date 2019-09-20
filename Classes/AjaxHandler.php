@@ -11,7 +11,7 @@ class AjaxHandler
         // You will get the db as ninja_error_logger_app()->db()
         // the db() function is almost same as laravel query builder
 
-        $perPage = 20;
+        $perPage = 10;
        
 
         $filter_data = $_POST['select_filter'];
@@ -21,11 +21,16 @@ class AjaxHandler
         
         if( $filter_data && $searchInput ){
 
-            $logs = ninja_error_logger_app()->db()->table('nel_error_logs')
-                    ->where('log_type', '=',  $error_levels[$filter_data] )
-                    ->andWhere('log_data', 'like', '%' . $searchInput . '%')         
-                    ->orderBy('id', 'DESC')
-                    ->get();        
+            $logs = ninja_error_logger_app()->db()->table('nel_error_logs')                  
+                    ->where('log_data', 'like', '%' . $searchInput . '%') 
+                    ->andWhere('log_type', '=',  $error_levels[$filter_data] ) 
+                    ->orWhere('request_method', 'like', '%' . $searchInput . '%')    
+                    ->orderBy('id', 'DESC')   
+                    ->paginate($perPage);  
+                    
+                    //->andWhere('log_type', '=',  $error_levels[$filter_data] ) 
+
+                    //$logs = $logs->whereIn('log_type', '=',  $error_levels[$filter_data]);
 
             $this->sendSuccess([
                 'logs' => $logs,
@@ -43,9 +48,7 @@ class AjaxHandler
             ->where('log_type', '=',  $error_levels[$filter_data] )
             ->orderBy('id', 'DESC')
             ->paginate($perPage);
-
             
-
             $this->sendSuccess([
                 'logs' => $logs,
                 'searchdata' => $filter_data,
@@ -61,7 +64,7 @@ class AjaxHandler
             ->orWhere('log_data', 'like', '%' . $searchInput . '%')
             ->orWhere('request_method', 'like', '%' . $searchInput . '%')
             ->orderBy('id', 'DESC')
-            ->get();
+            ->paginate($perPage);
 
             $this->sendSuccess([
                 'logs' => $logs,
@@ -72,16 +75,38 @@ class AjaxHandler
         }else{
 
             $logs = ninja_error_logger_app()->db()->table('nel_error_logs')
-            ->orderBy('id', 'DESC')
+            //->orderBy('id', 'DESC')
             ->paginate($perPage);
+
+            $total = count(ninja_error_logger_app()->db()->table('nel_error_logs')->get());
 
             $this->sendSuccess([
                 'logs' => $logs,
-                'error_levels' => $error_levels
+                'error_levels' => $error_levels,
+                'total_count' => $total,
             ]);
         }
 
        
+    }
+
+    public function getLogsPagination(){
+
+        $value = $_POST['value'];
+        $perPage = 10;
+        $total = count(ninja_error_logger_app()->db()->table('nel_error_logs')->get());
+
+        $logs = ninja_error_logger_app()->db()->table('nel_error_logs')
+            ->where('id','>',($value-1)*$perPage)
+            //->orderBy('id', 'DESC')
+            ->paginate($perPage);
+        
+        $this->sendSuccess([
+            'logs' => $logs,
+            'error_levels' => $value,
+            'total_count' => $total,
+        ]);
+
     }
 
     public function deleteLogs()
