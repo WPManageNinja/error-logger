@@ -94,7 +94,7 @@
                         this.logs = response.data.logs;
                         this.total_logs = response.data.total;
                         this.per_page = response.data.per_page;
-                        // this.page = response.data.logs.current_page;
+                        this.page = response.data.current_page;
                         // this.total_data = response.data.total_count; 
                         console.log(response);
                     })
@@ -112,7 +112,7 @@
                         this.logs = response.data.logs;
                         this.total_logs = response.data.total;
                         this.per_page = response.data.per_page;
-
+                        this.page = response.data.current_page;
                         // this.page = response.data.logs.current_page;
                         console.log(response);
                     })
@@ -128,8 +128,7 @@
                         this.logs = response.data.logs;
                         this.total_logs = response.data.total;
                         this.per_page = response.data.per_page;
-
-                        // this.page = response.data.logs.current_page;
+                        this.page = response.data.current_page;
                         this.error_levels = Object.keys(response.data.error_levels); 
                         // this.total_data = response.data.total_count; 
                         console.log(response);
@@ -153,7 +152,7 @@
                     this.logs = response.data.logs;
                     this.total_logs = response.data.total;
                     this.per_page = response.data.per_page;
-                    // this.page = response.data.logs.current_page;
+                    this.page = response.data.current_page;
                     // this.logs = response.data.logs.data;
                     console.log(response);
                 });

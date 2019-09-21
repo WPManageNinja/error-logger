@@ -18,7 +18,7 @@ class AjaxHandler
         $searchInput = sanitize_text_field($_POST['search']);
         $value = sanitize_text_field($_POST['value']);
 
-        $value = isset($value)?$value:0;
+        $value = isset($value)?absint($value):0;
         $searchInput = isset($searchInput)?$searchInput:'';
         $filter_data = isset($filter_data)?$filter_data:'';
 
@@ -54,6 +54,7 @@ class AjaxHandler
             'success' => 'two data find successfully',
             'total' => $total,
             'per_page' => $perPage,
+            'current_page' => $value
         ]);
 
         }
@@ -83,6 +84,7 @@ class AjaxHandler
                 'success' => 'filter data find successfully',
                 'total' => $total,
                 'per_page' => $perPage,
+                'current_page' => $value
             ]);
 
         }else if($searchInput){
@@ -103,6 +105,7 @@ class AjaxHandler
                 'success' => 'search data find successfully',
                 'total' => $total,
                 'per_page' => $perPage,
+                'current_page' => $value
             ]);
         
         }else{
@@ -116,6 +119,7 @@ class AjaxHandler
                 'error_levels' => $error_levels,
                 'total' => $total,
                 'per_page' => $perPage,
+                'current_page' => $value
             ]);
         }
 
