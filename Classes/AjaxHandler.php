@@ -13,31 +13,26 @@ class AjaxHandler
 
         $perPage = 10;
 
-        $filter_data = $_POST['select_filter'];
+        $filter_data = sanitize_text_field($_POST['select_filter']);
         $error_levels = GeneralSettings::$error_levels;
-        $searchInput = $_POST['search'];
-        $total = count(ninja_error_logger_app()->db()->table('nel_error_logs')->get());
+        $searchInput = sanitize_text_field($_POST['search']);
+        $value = sanitize_text_field($_POST['value']);
 
-        if( $filter_data && $searchInput ){
+        $value = isset($value)?$value:0;
+        $searchInput = isset($searchInput)?$searchInput:'';
+        $filter_data = isset($filter_data)?$filter_data:'';
 
         global $wpdb;
         $nel_error_logs = $wpdb->prefix . 'nel_error_logs';
+
+        if( $filter_data && $searchInput ){
 
         $logs = $wpdb->get_results(
             "SELECT * FROM $nel_error_logs 
             where (log_data LIKE '%$searchInput%' OR request_method LIKE '%$searchInput%' ) 
             AND log_type=$error_levels[$filter_data]"); 
 
-        // $logs = ninja_error_logger_app()->db()->table('nel_error_logs')                  
-        //         ->where('log_data', 'like', '%' . $searchInput . '%') 
-        //         ->andWhere('log_type', '=',  $error_levels[$filter_data] ) 
-        //         ->orWhere('request_method', 'like', '%' . $searchInput . '%')    
-        //         ->orderBy('id', 'DESC')   
-        //         ->paginate($perPage);  
-                
-                //->andWhere('log_type', '=',  $error_levels[$filter_data] ) 
-
-                //$logs = $logs->whereIn('log_type', '=',  $error_levels[$filter_data]);
+        $total = count($logs);
 
         $this->sendSuccess([
             'logs' => $logs,
@@ -45,23 +40,42 @@ class AjaxHandler
             'searchdata'  => $searchInput,
             'error_levels' => $error_levels[$filter_data],
             'errors' => $error_levels,
-            'success' => 'two data find successfully'
+            'success' => 'two data find successfully',
+            'total' => $total,
+            'per_page' => $perPage,
         ]);
 
         }
         else if( $filter_data ){
 
-            $logs = ninja_error_logger_app()->db()->table('nel_error_logs')
-            ->where('log_type', '=',  $error_levels[$filter_data] )
+            // $logs = ninja_error_logger_app()->db()->table('nel_error_logs')
+            // ->where('log_type', '=',  $error_levels[$filter_data])
+            // ->orderBy('id', 'DESC')
+            // ->paginate($perPage);
+
+            $total = ninja_error_logger_app()->db()->table('nel_error_logs')
+            ->where('log_type', '=',  $error_levels[$filter_data])
             ->orderBy('id', 'DESC')
-            ->paginate($perPage);
+            ->get();
+            
+            
+            if( $value == 0 ){
+                $OFFSET = 0;
+            }else{
+                $OFFSET = ($value-1)*$perPage;
+            }
+            $logs = $wpdb->get_results("SELECT * FROM $nel_error_logs where  log_type=$error_levels[$filter_data] ORDER BY id LIMIT $perPage OFFSET $OFFSET");
+
+            $total = count($total);
             
             $this->sendSuccess([
-                'logs' => $logs['data'],
+                'logs' => $logs,
                 'searchdata' => $filter_data,
                 'error_levels' => $error_levels[$filter_data],
                 'errors' => $error_levels,
-                'success' => 'filter data find successfully'
+                'success' => 'filter data find successfully',
+                'total' => $total,
+                'per_page' => $perPage,
             ]);
 
         }else if($searchInput){
@@ -73,19 +87,23 @@ class AjaxHandler
             ->orderBy('id', 'DESC')
             ->paginate($perPage);
 
+            $total = count($logs);
+
             $this->sendSuccess([
                 'logs' => $logs['data'],
                 'errors' => $error_levels,
-                'success' => 'search data find successfully'
+                'success' => 'search data find successfully',
+                'total' => $total,
+                'per_page' => $perPage,
             ]);
         
         }else{
 
             $logs = ninja_error_logger_app()->db()->table('nel_error_logs')
-            //->orderBy('id', 'DESC')
+            ->orderBy('id', 'DESC')
             ->paginate($perPage);
 
-            
+            $total = count(ninja_error_logger_app()->db()->table('nel_error_logs')->get());
 
             $this->sendSuccess([
                 'logs' => $logs['data'],
@@ -100,13 +118,15 @@ class AjaxHandler
 
     public function getLogsPagination(){
 
-        $value = $_POST['value'];
+        $value = sanitize_text_field($_POST['value']);
         $perPage = 10;
-        $total = count(ninja_error_logger_app()->db()->table('nel_error_logs')->get());
+        $from = ninja_error_logger_app()->db()->table('nel_error_logs')->orderBy('id', 'DESC')->first();
+        $from = absint($from->id);
 
+        $total = count(ninja_error_logger_app()->db()->table('nel_error_logs')->get());
         $logs = ninja_error_logger_app()->db()->table('nel_error_logs')
-            ->where('id','>',($value-1)*$perPage)
-            //->orderBy('id', 'DESC')
+            ->where('id','<=',$from-($value-1)*$perPage)
+            ->orderBy('id', 'DESC')
             ->paginate($perPage);
         
         $this->sendSuccess([

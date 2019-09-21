@@ -84,9 +84,11 @@
         },
         methods: {
             handleCurrentChange(val) {
-                console.log(val);
-                this.$post('get_logs_pagination', {
-                    value: val
+                console.log(this.filterValue);
+                this.$post('get_logs', {
+                    value: val,
+                    search: this.input_search,
+                    select_filter: this.filterValue
                 })
                     .then(response => {
                         this.logs = response.data.logs;
@@ -99,16 +101,20 @@
             },
             selectItem() {
                 console.log('i m pressed ' + this.filterValue);
+
+                this.filterValue = this.filterValue;
+
                 this.$post('get_logs', {
                     search: this.input_search,
                     select_filter: this.filterValue
                 })
                     .then(response => {
                         this.logs = response.data.logs;
-                        // this.total_logs = response.data.logs.total;
-                        // this.per_page = response.data.logs.per_page;
+                        this.total_logs = response.data.total;
+                        this.per_page = response.data.per_page;
+
                         // this.page = response.data.logs.current_page;
-                        console.log(this.logs);
+                        console.log(response);
                     })
             },
             getLogs() {
@@ -138,6 +144,8 @@
             },
 
             searchData() {
+                this.input_search = this.input_search;
+
                 this.$post('get_logs', {
                     search: this.input_search,
                     select_filter: this.filterValue
