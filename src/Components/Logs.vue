@@ -39,7 +39,7 @@
                 </el-table>
 
                 <div class="pagination-section">
-                    <el-pagination background layout="prev, pager, next" :current-page="page" :page-size="per_page" @current-change="handleCurrentChange" :total="total_data">
+                    <el-pagination background layout="prev, pager, next" :current-page="page" :page-size="per_page" @current-change="handleCurrentChange" :total="total_logs">
                     </el-pagination>
                 </div>
             </el-col>
@@ -90,8 +90,8 @@
                 })
                     .then(response => {
                         this.logs = response.data.logs;
-                        // this.total_logs = response.data.logs.total;
-                        // this.per_page = response.data.logs.per_page;
+                        this.total_logs = response.data.total;
+                        this.per_page = response.data.per_page;
                         // this.page = response.data.logs.current_page;
                         // this.total_data = response.data.total_count; 
                         console.log(response);
@@ -120,11 +120,12 @@
                 })
                     .then(response => {
                         this.logs = response.data.logs;
-                        this.total_logs = response.data.logs.total;
-                        this.per_page = response.data.logs.per_page;
-                        this.page = response.data.logs.current_page;
+                        this.total_logs = response.data.total;
+                        this.per_page = response.data.per_page;
+
+                        // this.page = response.data.logs.current_page;
                         this.error_levels = Object.keys(response.data.error_levels); 
-                        this.total_data = response.data.total_count; 
+                        // this.total_data = response.data.total_count; 
                         console.log(response);
                     })
                     .fail(error => {
@@ -142,8 +143,8 @@
                     select_filter: this.filterValue
                 }).then(response => { 
                     this.logs = response.data.logs;
-                    // this.total_logs = response.data.logs.total;
-                    // this.per_page = 5;
+                    this.total_logs = response.data.total;
+                    this.per_page = response.data.per_page;
                     // this.page = response.data.logs.current_page;
                     // this.logs = response.data.logs.data;
                     console.log(response);
