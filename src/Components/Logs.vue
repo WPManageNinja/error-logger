@@ -145,7 +145,7 @@
 
             searchData() {
                 this.input_search = this.input_search;
-
+                console.log(this.input_search);
                 this.$post('get_logs', {
                     search: this.input_search,
                     select_filter: this.filterValue

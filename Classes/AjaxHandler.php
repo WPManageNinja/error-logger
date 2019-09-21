@@ -25,14 +25,25 @@ class AjaxHandler
         global $wpdb;
         $nel_error_logs = $wpdb->prefix . 'nel_error_logs';
 
+        if( $value == 0 ){
+            $OFFSET = 0;
+        }else{
+            $OFFSET = ($value-1)*$perPage;
+        }
+
         if( $filter_data && $searchInput ){
 
-        $logs = $wpdb->get_results(
+        $total = $wpdb->get_results(
             "SELECT * FROM $nel_error_logs 
             where (log_data LIKE '%$searchInput%' OR request_method LIKE '%$searchInput%' ) 
             AND log_type=$error_levels[$filter_data]"); 
 
-        $total = count($logs);
+        $total = count($total);
+
+        $logs = $wpdb->get_results(
+            "SELECT * FROM $nel_error_logs 
+            where (log_data LIKE '%$searchInput%' OR request_method LIKE '%$searchInput%' ) 
+            AND log_type=$error_levels[$filter_data] ORDER BY id LIMIT $perPage OFFSET $OFFSET"); 
 
         $this->sendSuccess([
             'logs' => $logs,
@@ -59,11 +70,7 @@ class AjaxHandler
             ->get();
             
             
-            if( $value == 0 ){
-                $OFFSET = 0;
-            }else{
-                $OFFSET = ($value-1)*$perPage;
-            }
+            
             $logs = $wpdb->get_results("SELECT * FROM $nel_error_logs where  log_type=$error_levels[$filter_data] ORDER BY id LIMIT $perPage OFFSET $OFFSET");
 
             $total = count($total);
@@ -80,17 +87,18 @@ class AjaxHandler
 
         }else if($searchInput){
 
-            $logs = ninja_error_logger_app()->db()->table('nel_error_logs')
+            $total = ninja_error_logger_app()->db()->table('nel_error_logs')
             ->where('log_type', 'like', '%' . $searchInput . '%' )
             ->orWhere('log_data', 'like', '%' . $searchInput . '%')
             ->orWhere('request_method', 'like', '%' . $searchInput . '%')
-            ->orderBy('id', 'DESC')
-            ->paginate($perPage);
+            ->get();
 
-            $total = count($logs);
+            $logs = $wpdb->get_results("SELECT * FROM $nel_error_logs where (log_type LIKE '%$searchInput%' OR log_data LIKE '%$searchInput%' OR request_method LIKE '%$searchInput%') ORDER BY id LIMIT $perPage OFFSET $OFFSET");
+
+            $total = count($total);
 
             $this->sendSuccess([
-                'logs' => $logs['data'],
+                'logs' => $logs,
                 'errors' => $error_levels,
                 'success' => 'search data find successfully',
                 'total' => $total,
@@ -99,14 +107,12 @@ class AjaxHandler
         
         }else{
 
-            $logs = ninja_error_logger_app()->db()->table('nel_error_logs')
-            ->orderBy('id', 'DESC')
-            ->paginate($perPage);
+            $logs = $wpdb->get_results("SELECT * FROM $nel_error_logs ORDER BY id LIMIT $perPage OFFSET $OFFSET");
 
             $total = count(ninja_error_logger_app()->db()->table('nel_error_logs')->get());
 
             $this->sendSuccess([
-                'logs' => $logs['data'],
+                'logs' => $logs,
                 'error_levels' => $error_levels,
                 'total' => $total,
                 'per_page' => $perPage,
