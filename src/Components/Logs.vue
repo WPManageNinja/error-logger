@@ -3,27 +3,37 @@
         <el-row>
             <el-col>
                 <el-form>
-                    <el-col :span="4">
-                        <el-form-item>
-                            <el-select v-model="filterValue" placeholder="Type" @change="selectItem">
-                                <el-option v-for="item in error_levels" :key= "item" :label= "item" :value= "item"></el-option>
-                            </el-select>
-                        </el-form-item>
+                    <el-col :span="7" style="display:inline-block;">
+                        <el-select v-model="optionValue" placeholder="Bulk Actions">
+                            <el-option key="bulk" label="Bulk Actions" value="bulk"></el-option>
+                            <el-option key="delete" label="Delete Logs" value="delete"></el-option>
+                        </el-select>
+                        <el-button type="primary" @click.prevent="doAction()">Apply</el-button>
                     </el-col>
-                    <el-col :span="4">
-                        <el-form-item>
-                            <el-input placeholder="Search in logs" prefix-icon="el-icon-search" @keyup.enter.native="searchData()" v-model="input_search"></el-input>
-                            <!-- <input placeholder="Search in logs" @keyup="searchData" v-model="input_search" /> -->
-                        </el-form-item>
-                    </el-col>
+                    <div class="filtering-data">
+                        <el-col :span="12">
+                            <el-form-item>
+                                <el-select v-model="filterValue" placeholder="Type" @change="selectItem">
+                                    <el-option v-for="item in error_levels" :key= "item" :label= "item" :value= "item"></el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="10">
+                            <el-form-item>
+                                <el-input placeholder="Search in logs" prefix-icon="el-icon-search" @keyup.enter.native="searchData()" v-model="input_search"></el-input>
+                                <!-- <input placeholder="Search in logs" @keyup="searchData" v-model="input_search" /> -->
+                            </el-form-item>
+                        </el-col>
+                    </div>
                 </el-form>
             </el-col>
             <el-col>
-                <el-table :data="logs" style="width: 100%">
+                <el-table v-loading="loading" element-loading-text="Loading..." :data="logs" style="width: 100%"  @selection-change="handleSelectionChange" ref="multipleTable">
+                    <el-table-column type="selection" width="55"></el-table-column>
                     <el-table-column type="expand">
                         <template slot-scope="props">
                             <p><strong>About Log Data : </strong>{{ props.row.log_data }}</p>
-                            <p><strong>Log Type : </strong>{{ props.row.log_type }}</p>
+                            <p><strong>Log Type : </strong>{{ mapError[props.row.log_type] }}</p>
                             <p><strong>Method : </strong>{{ props.row.request_method }}</p>
                             <p><strong>Line Number : </strong>{{ props.row.log_line }}</p>
                             <p><strong>File Name : </strong>{{ props.row.log_file }}</p>
@@ -31,7 +41,11 @@
                         </template>
                     </el-table-column>
                     <el-table-column label="Id" prop="id"></el-table-column>
-                    <el-table-column prop="log_type" label="type"></el-table-column>
+                    <el-table-column label="type">
+                        <template slot-scope="props">
+                            {{mapError[props.row.log_type]}}
+                        </template>
+                    </el-table-column>
                     <el-table-column prop="request_method" label="request method"></el-table-column>
                     <el-table-column prop="created_at" label="created at"></el-table-column>
                     <el-table-column @click.prevent = "deleteRow()" label="Action">
@@ -42,11 +56,24 @@
                 </el-table>
 
                 <div class="pagination-section">
-                    <el-pagination background layout="prev, pager, next" :current-page="page" :page-size="per_page" @current-change="handleCurrentChange" :total="total_logs">
+                    <el-pagination background layout="prev, pager, sizes, next" :page-sizes="pageSizes" :current-page="page" :page-size="per_page_item" @size-change="handleSizeChange" @current-change="handleCurrentChange" :total="total_logs">
                     </el-pagination>
                 </div>
 
                 <!--Delete form Confimation Modal-->
+                <el-dialog
+                    title="Are You Sure, You want to delete these selected Log?"
+                    :visible.sync="deleteDialogVisibleMultiple"
+                    width="60%">
+                    <div class="modal_body">
+                        <p>All the data assoscilate with this log  will be deleted</p>                     
+                    </div>
+                    <span slot="footer" class="dialog-footer">
+                        <el-button @click="deleteDialogVisibleMultiple = false">Cancel</el-button>
+                        <el-button type="primary" @click="deleteMultiple()">Confirm</el-button>
+                    </span>
+                </el-dialog>
+
                 <el-dialog
                     title="Are You Sure, You want to delete this Log?"
                     :visible.sync="deleteDialogVisible"
@@ -76,6 +103,18 @@
         text-align: center;
     }
 
+    .filtering-data{
+        float: right;
+    }
+
+    .item-type{
+        margin-right: 5px;
+    }
+
+    ..el-notification {
+        margin-top:10px;
+    }
+
 </style>
 
 <script type="text/babel">
@@ -86,8 +125,9 @@
                 input_search: '',
                 logs: [],
                 total_logs: 0,
-                per_page: 5,
+                per_page_item: 5,
                 page: 1,
+                pageSizes: [5, 10, 20, 30, 40, 50, 100, 200],
                 search: '',
                 fetching: false,
                 formInline: {
@@ -98,11 +138,89 @@
                 error_levels: [],
                 total_data: 0,
                 deleteDialogVisible: false,
-                rowTODelete: ''              
+                rowTODelete: '',
+                multipleSelection: [],
+                optionValue: '',
+                deleteDialogVisibleMultiple: false,
+                loading: true,
+                mapError: 
+                    {
+                        64: 'E_COMPILE_ERROR',
+                        128: 'E_COMPILE_WARNING',
+                        16: 'E_CORE_ERROR',
+                        32: 'E_CORE_WARNING',
+                        8192: 'E_DEPRECATED',
+                        1: 'E_ERROR',
+                        8: 'E_NOTICE',
+                        4: 'E_PARSE',
+                        4096: 'E_RECOVERABLE_ERROR',
+                        2048: 'E_STRICT',
+                        16384: 'E_USER_DEPRECATED',
+                        256: 'E_USER_ERROR',
+                        1024: 'E_USER_NOTICE',
+                        512: 'E_USER_WARNING',
+                        2: 'E_WARNING'
+                    }
+                            
             }
         },
         methods: {
 
+            handleSizeChange(val) {
+                this.per_page_item = val;
+                this.getLogs();
+                // console.log('this page has ' + this.per_page_item);
+                // this.$post('get_logs', {
+                //     value: this.value,
+                //     search: this.input_search,
+                //     select_filter: this.filterValue,
+                //     per_page_total: this.per_page_item
+                // })
+                //     .then(response => {
+                //         this.logs = response.data.logs;
+                //         this.total_logs = response.data.total;
+                //         this.per_page = response.data.per_page;
+                //         this.page = response.data.current_page;
+                //         // this.total_data = response.data.total_count; 
+                //         console.log(response);
+                //     })
+            },
+
+            // for multiple delete dialog
+            deleteMultiple() {
+                this.$post('delete_bulk_logs', {
+                    row_ids: this.multipleSelection
+                })
+                    .then(response => {
+                        this.$notify({
+                            title: 'Success',
+                            message: 'Logs Deleted Successfully',
+                            type: 'success',
+                            position: 'bottom-right'
+                        });
+                        console.log(response);
+                        this.getLogs();
+                    })
+                    .fail(error => {
+                        console.log(error);
+                    })
+                    .always(() => {
+                        console.log('always');
+                        this.deleteDialogVisibleMultiple = false;
+                    });
+            },
+
+            doAction() {
+                if (this.multipleSelection.length == 0) {
+                    console.log('need to select one to ' + this.optionValue);
+                } else if (this.optionValue == 'delete') {
+                    this.deleteDialogVisibleMultiple = true;
+                    console.log('selected items is = ' + this.multipleSelection.length + ' and we have to ' + this.optionValue);
+                }
+            },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+            },
             deleteFormNow() {
                 console.log('delete row now ' + this.rowTODelete);
 
@@ -110,7 +228,14 @@
                     row_id: this.rowTODelete
                 })
                     .then(response => {
+                        this.$notify({
+                            title: 'Success',
+                            message: 'Logs Deleted Successfully',
+                            type: 'success',
+                            position: 'bottom-right'
+                        });
                         console.log(response);
+                        this.getLogs();
                     })
                     .fail(error => {
                         console.log(error);
@@ -126,15 +251,17 @@
             },
             handleCurrentChange(val) {
                 console.log(this.filterValue);
+                this.value = val;
                 this.$post('get_logs', {
                     value: val,
                     search: this.input_search,
-                    select_filter: this.filterValue
+                    select_filter: this.filterValue,
+                    per_page_total: this.per_page_item
                 })
                     .then(response => {
                         this.logs = response.data.logs;
                         this.total_logs = response.data.total;
-                        this.per_page = response.data.per_page;
+                        this.per_page_item = response.data.per_page;
                         this.page = response.data.current_page;
                         // this.total_data = response.data.total_count; 
                         console.log(response);
@@ -152,23 +279,26 @@
                     .then(response => {
                         this.logs = response.data.logs;
                         this.total_logs = response.data.total;
-                        this.per_page = response.data.per_page;
+                        this.per_page_item = response.data.per_page;
                         this.page = response.data.current_page;
                         // this.page = response.data.logs.current_page;
                         console.log(response);
                     })
             },
             getLogs() {
+                console.log('i am now getlogs ' + this.per_page_item);
+
                 this.fetching = true;
                 this.$get('get_logs', {
                     search: this.search,
                     page: this.page,
-                    per_page: this.per_page
+                    per_page_total: this.per_page_item
                 })
                     .then(response => {
+                        this.loading = false;
                         this.logs = response.data.logs;
                         this.total_logs = response.data.total;
-                        this.per_page = response.data.per_page;
+                        this.per_page_item = response.data.per_page;
                         this.page = response.data.current_page;
                         this.error_levels = Object.keys(response.data.error_levels); 
                         // this.total_data = response.data.total_count; 
@@ -194,12 +324,12 @@
                     this.total_logs = response.data.total;
                     this.per_page = response.data.per_page;
                     this.page = response.data.current_page;
-                    // this.logs = response.data.logs.data;
                     console.log(response);
                 });
             }
         },
         mounted() {
+            console.log(this.mapError[2]);
             this.getLogs();
         }
     }

@@ -11,14 +11,14 @@ class AjaxHandler
         // You will get the db as ninja_error_logger_app()->db()
         // the db() function is almost same as laravel query builder
 
-        $perPage = 10;
         $searchInput  = isset($_POST['search'])?$_POST['search']:''; 
         $searchInput  = sanitize_text_field($searchInput);
 
         $filter_data  = isset($_POST['select_filter'])?$_POST['select_filter']:''; 
         $filter_data  = sanitize_text_field($filter_data);
 
-        $value       = isset($_POST['value'])?absint($_POST['value']):0;
+        $value        = isset($_POST['value'])?absint($_POST['value']):0;
+        $perPage      = isset($_REQUEST['per_page_total'])?absint($_REQUEST['per_page_total']):5;
 
         $error_levels = GeneralSettings::$error_levels;
         
@@ -139,6 +139,21 @@ class AjaxHandler
         ]);
     }
 
+    public function deleteBulkLogs()
+    {
+        // Delete Selected Logs here
+        $rowIds = isset($_POST['row_ids'])?$_POST['row_ids']:null;
+
+        foreach($rowIds as $row){
+            ninja_error_logger_app()->db()->table('nel_error_logs')->where('id',$row['id'])->delete();
+        }
+
+        $this->sendSuccess([
+            'row_id' => $rowIds,
+            'success' => 'deleted selected row',
+        ]);
+    }
+
     public function saveNotificationSettings()
     {
         // Save Your Notification Settings here
@@ -169,7 +184,6 @@ class AjaxHandler
             'email_log_types' => GeneralSettings::getEmailBroadCastErrorTypes(),
             'db_log_types' => GeneralSettings::getDbStropeErrorTypes(),
             'email_settings' => GeneralSettings::getEmailSettings(),
-            'email' => $email,
             'notification_settings' => get_option('ninja_notification_type_settings'),
             'database_settings'     => get_option('ninja_database_logs_settings')
         ];
