@@ -12,16 +12,16 @@ class AjaxHandler
         // the db() function is almost same as laravel query builder
 
         $perPage = 10;
+        $searchInput  = isset($_POST['search'])?$_POST['search']:''; 
+        $searchInput  = sanitize_text_field($searchInput);
 
-        $filter_data  = sanitize_text_field($_POST['select_filter']);
+        $filter_data  = isset($_POST['select_filter'])?$_POST['select_filter']:''; 
+        $filter_data  = sanitize_text_field($filter_data);
+
+        $value       = isset($_POST['value'])?absint($_POST['value']):0;
+
         $error_levels = GeneralSettings::$error_levels;
-        $searchInput  = sanitize_text_field($_POST['search']);
-        $value        = sanitize_text_field($_POST['value']);
-
-        $value       = isset($value)?absint($value):0;
-        $searchInput = isset($searchInput)?$searchInput:'';
-        $filter_data = isset($filter_data)?$filter_data:'';
-
+        
         global $wpdb;
         $nel_error_logs = $wpdb->prefix . 'nel_error_logs';
 
@@ -126,43 +126,27 @@ class AjaxHandler
        
     }
 
-    public function getLogsPagination(){
-
-        $value = sanitize_text_field($_POST['value']);
-        $perPage = 10;
-        $from = ninja_error_logger_app()->db()->table('nel_error_logs')->orderBy('id', 'DESC')->first();
-        $from = absint($from->id);
-
-        $total = count(ninja_error_logger_app()->db()->table('nel_error_logs')->get());
-        $logs = ninja_error_logger_app()->db()->table('nel_error_logs')
-            ->where('id','<=',$from-($value-1)*$perPage)
-            ->orderBy('id', 'DESC')
-            ->paginate($perPage);
-        
-        $this->sendSuccess([
-            'logs' => $logs['data'],
-            'error_levels' => $value,
-            'total' => $total,
-            'per_page' => $perPage
-        ]);
-
-    }
-
     public function deleteLogs()
     {
         // Delete Selected Logs here
+        $rowId = isset($_POST['row_id'])?$_POST['row_id']:null;
+
+        ninja_error_logger_app()->db()->table('nel_error_logs')->where('id',$rowId)->delete();
+
+        $this->sendSuccess([
+            'row_id' => $rowId,
+            'success' => 'deleted row',
+        ]);
     }
 
     public function saveNotificationSettings()
     {
         // Save Your Notification Settings here
-        $email = sanitize_email($_POST['email']);
-        $notification_type_settings = $_POST['notification_type_settings'];
-        $database_logs_settings     = $_POST['database_logs_settings'];
+        $email                      = isset($_POST['email'])?$_POST['email']:null;
+        $notification_type_settings = isset($_POST['notification_type_settings'])?$_POST['notification_type_settings']:null;
+        $database_logs_settings     = isset($_POST['database_logs_settings'])?$_POST['database_logs_settings']:null;
 
-        $email = isset($email)?$email:null;
-        $notification_type_settings = isset($notification_type_settings)?$notification_type_settings:null;
-        $database_logs_settings = isset($database_logs_settings)?$database_logs_settings:null;
+        $email = sanitize_email($email);
 
         update_option('nel_email_settings',$email);  
         update_option('ninja_notification_type_settings',$notification_type_settings);      
