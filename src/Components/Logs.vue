@@ -12,8 +12,8 @@
                     </el-col>
                     <el-col :span="4">
                         <el-form-item>
-                            <!-- <el-input placeholder="Search in logs" prefix-icon="el-icon-search" @keyup.enter="searchData" v-model="input_search"></el-input> -->
-                            <input placeholder="Search in logs" @keyup="searchData" v-model="input_search" />
+                            <el-input placeholder="Search in logs" prefix-icon="el-icon-search" @keyup.enter.native="searchData()" v-model="input_search"></el-input>
+                            <!-- <input placeholder="Search in logs" @keyup="searchData" v-model="input_search" /> -->
                         </el-form-item>
                     </el-col>
                 </el-form>
@@ -25,6 +25,8 @@
                             <p><strong>About Log Data : </strong>{{ props.row.log_data }}</p>
                             <p><strong>Log Type : </strong>{{ props.row.log_type }}</p>
                             <p><strong>Method : </strong>{{ props.row.request_method }}</p>
+                            <p><strong>Line Number : </strong>{{ props.row.log_line }}</p>
+                            <p><strong>File Name : </strong>{{ props.row.log_file }}</p>
                             <p><strong>Created At : </strong>{{ props.row.created_at }}</p>
                         </template>
                     </el-table-column>

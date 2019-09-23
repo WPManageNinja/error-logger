@@ -13,12 +13,12 @@ class AjaxHandler
 
         $perPage = 10;
 
-        $filter_data = sanitize_text_field($_POST['select_filter']);
+        $filter_data  = sanitize_text_field($_POST['select_filter']);
         $error_levels = GeneralSettings::$error_levels;
-        $searchInput = sanitize_text_field($_POST['search']);
-        $value = sanitize_text_field($_POST['value']);
+        $searchInput  = sanitize_text_field($_POST['search']);
+        $value        = sanitize_text_field($_POST['value']);
 
-        $value = isset($value)?absint($value):0;
+        $value       = isset($value)?absint($value):0;
         $searchInput = isset($searchInput)?$searchInput:'';
         $filter_data = isset($filter_data)?$filter_data:'';
 
@@ -43,7 +43,7 @@ class AjaxHandler
         $logs = $wpdb->get_results(
             "SELECT * FROM $nel_error_logs 
             where (log_data LIKE '%$searchInput%' OR request_method LIKE '%$searchInput%' ) 
-            AND log_type=$error_levels[$filter_data] ORDER BY id LIMIT $perPage OFFSET $OFFSET"); 
+            AND log_type=$error_levels[$filter_data] ORDER BY id DESC LIMIT $perPage OFFSET $OFFSET"); 
 
         $this->sendSuccess([
             'logs' => $logs,
@@ -72,7 +72,7 @@ class AjaxHandler
             
             
             
-            $logs = $wpdb->get_results("SELECT * FROM $nel_error_logs where  log_type=$error_levels[$filter_data] ORDER BY id LIMIT $perPage OFFSET $OFFSET");
+            $logs = $wpdb->get_results("SELECT * FROM $nel_error_logs where  log_type=$error_levels[$filter_data] ORDER BY id DESC LIMIT $perPage OFFSET $OFFSET");
 
             $total = count($total);
             
@@ -95,7 +95,7 @@ class AjaxHandler
             ->orWhere('request_method', 'like', '%' . $searchInput . '%')
             ->get();
 
-            $logs = $wpdb->get_results("SELECT * FROM $nel_error_logs where (log_type LIKE '%$searchInput%' OR log_data LIKE '%$searchInput%' OR request_method LIKE '%$searchInput%') ORDER BY id LIMIT $perPage OFFSET $OFFSET");
+            $logs = $wpdb->get_results("SELECT * FROM $nel_error_logs where (log_type LIKE '%$searchInput%' OR log_data LIKE '%$searchInput%' OR request_method LIKE '%$searchInput%') ORDER BY id DESC LIMIT $perPage OFFSET $OFFSET");
 
             $total = count($total);
 
@@ -110,7 +110,7 @@ class AjaxHandler
         
         }else{
 
-            $logs = $wpdb->get_results("SELECT * FROM $nel_error_logs ORDER BY id LIMIT $perPage OFFSET $OFFSET");
+            $logs = $wpdb->get_results("SELECT * FROM $nel_error_logs ORDER BY id DESC LIMIT $perPage OFFSET $OFFSET");
 
             $total = count(ninja_error_logger_app()->db()->table('nel_error_logs')->get());
 
@@ -159,6 +159,10 @@ class AjaxHandler
         $email = sanitize_email($_POST['email']);
         $notification_type_settings = $_POST['notification_type_settings'];
         $database_logs_settings     = $_POST['database_logs_settings'];
+
+        $email = isset($email)?$email:null;
+        $notification_type_settings = isset($notification_type_settings)?$notification_type_settings:null;
+        $database_logs_settings = isset($database_logs_settings)?$database_logs_settings:null;
 
         update_option('nel_email_settings',$email);  
         update_option('ninja_notification_type_settings',$notification_type_settings);      
