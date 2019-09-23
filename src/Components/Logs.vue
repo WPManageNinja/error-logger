@@ -111,8 +111,12 @@
         margin-right: 5px;
     }
 
-    ..el-notification {
-        margin-top:10px;
+    .el-select{
+        margin-right: 10px;
+    }
+
+    .el-notification{
+        margin-top:20px;
     }
 
 </style>
@@ -204,7 +208,7 @@
                             title: 'Success',
                             message: 'Logs Deleted Successfully',
                             type: 'success',
-                            position: 'bottom-right'
+                            position: 'top-right'
                         });
                         console.log(response);
                         this.getLogs();
@@ -237,7 +241,7 @@
                             title: 'Success',
                             message: 'Logs Deleted Successfully',
                             type: 'success',
-                            position: 'bottom-right'
+                            position: 'top-right'
                         });
                         console.log(response);
                         this.getLogs();
