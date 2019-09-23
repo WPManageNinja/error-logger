@@ -128,7 +128,6 @@
                 per_page_item: 5,
                 page: 1,
                 pageSizes: [5, 10, 20, 30, 40, 50, 100, 200],
-                search: '',
                 fetching: false,
                 formInline: {
                     user: '',
@@ -165,27 +164,36 @@
             }
         },
         methods: {
+            getLogs() {
+                this.loading = true;
+                console.log('i am now getlogs ' + this.per_page_item);
 
-            handleSizeChange(val) {
-                this.per_page_item = val;
-                this.getLogs();
-                // console.log('this page has ' + this.per_page_item);
-                // this.$post('get_logs', {
-                //     value: this.value,
-                //     search: this.input_search,
-                //     select_filter: this.filterValue,
-                //     per_page_total: this.per_page_item
-                // })
-                //     .then(response => {
-                //         this.logs = response.data.logs;
-                //         this.total_logs = response.data.total;
-                //         this.per_page = response.data.per_page;
-                //         this.page = response.data.current_page;
-                //         // this.total_data = response.data.total_count; 
-                //         console.log(response);
-                //     })
+                this.fetching = true;
+                this.$get('get_logs', {
+                    search: this.input_search,
+                    page: this.page,
+                    per_page_total: this.per_page_item,
+                    select_filter: this.filterValue,
+                    value: this.value
+                })
+                    .then(response => {
+                        this.loading = false;
+                        this.logs = response.data.logs;
+                        this.total_logs = response.data.total;
+                        this.per_page_item = response.data.per_page;
+                        this.page = response.data.current_page;
+                        this.error_levels = Object.keys(response.data.error_levels); 
+                        // this.total_data = response.data.total_count; 
+                        console.log(response);
+                    })
+                    .fail(error => {
+                        // handle error here
+                        console.log(error);
+                    })
+                    .always(() => {
+                        this.fetching = false;
+                    });
             },
-
             // for multiple delete dialog
             deleteMultiple() {
                 this.$post('delete_bulk_logs', {
@@ -209,7 +217,6 @@
                         this.deleteDialogVisibleMultiple = false;
                     });
             },
-
             doAction() {
                 if (this.multipleSelection.length == 0) {
                     console.log('need to select one to ' + this.optionValue);
@@ -218,16 +225,14 @@
                     console.log('selected items is = ' + this.multipleSelection.length + ' and we have to ' + this.optionValue);
                 }
             },
-            handleSelectionChange(val) {
-                this.multipleSelection = val;
-            },
             deleteFormNow() {
                 console.log('delete row now ' + this.rowTODelete);
-
+                this.loading = true;
                 this.$post('delete_logs', {
                     row_id: this.rowTODelete
                 })
                     .then(response => {
+                        this.loading = false;
                         this.$notify({
                             title: 'Success',
                             message: 'Logs Deleted Successfully',
@@ -244,88 +249,34 @@
                         this.deleteDialogVisible = false;
                     });
             },
+            handleSelectionChange(val) {
+                this.multipleSelection = val;
+                console.log('selected items ' + this.multipleSelection);
+            },
+            handleSizeChange(val) {
+                this.per_page_item = val;
+                console.log('per page item ' + this.per_page_item);
+                this.getLogs();
+            },
             confirmDelete(row) {
                 this.deleteDialogVisible = true;
-                this.rowTODelete = row;
                 console.log('delete log ' + row);
+                this.rowTODelete = row;
             },
             handleCurrentChange(val) {
-                console.log(this.filterValue);
                 this.value = val;
-                this.$post('get_logs', {
-                    value: val,
-                    search: this.input_search,
-                    select_filter: this.filterValue,
-                    per_page_total: this.per_page_item
-                })
-                    .then(response => {
-                        this.logs = response.data.logs;
-                        this.total_logs = response.data.total;
-                        this.per_page_item = response.data.per_page;
-                        this.page = response.data.current_page;
-                        // this.total_data = response.data.total_count; 
-                        console.log(response);
-                    })
+                console.log(this.value);
+                this.getLogs();
             },
-            selectItem() {
-                console.log('i m pressed ' + this.filterValue);
-
-                this.filterValue = this.filterValue;
-
-                this.$post('get_logs', {
-                    search: this.input_search,
-                    select_filter: this.filterValue
-                })
-                    .then(response => {
-                        this.logs = response.data.logs;
-                        this.total_logs = response.data.total;
-                        this.per_page_item = response.data.per_page;
-                        this.page = response.data.current_page;
-                        // this.page = response.data.logs.current_page;
-                        console.log(response);
-                    })
-            },
-            getLogs() {
-                console.log('i am now getlogs ' + this.per_page_item);
-
-                this.fetching = true;
-                this.$get('get_logs', {
-                    search: this.search,
-                    page: this.page,
-                    per_page_total: this.per_page_item
-                })
-                    .then(response => {
-                        this.loading = false;
-                        this.logs = response.data.logs;
-                        this.total_logs = response.data.total;
-                        this.per_page_item = response.data.per_page;
-                        this.page = response.data.current_page;
-                        this.error_levels = Object.keys(response.data.error_levels); 
-                        // this.total_data = response.data.total_count; 
-                        console.log(response);
-                    })
-                    .fail(error => {
-                        // handle error here
-                        console.log(error);
-                    })
-                    .always(() => {
-                        this.fetching = false;
-                    });
-            },
-
             searchData() {
                 this.input_search = this.input_search;
                 console.log(this.input_search);
-                this.$post('get_logs', {
-                    search: this.input_search,
-                    select_filter: this.filterValue
-                }).then(response => { 
-                    this.logs = response.data.logs;
-                    this.total_logs = response.data.total;
-                    this.per_page = response.data.per_page;
-                    this.page = response.data.current_page;
-                    console.log(response);
-                });
+                this.getLogs();
+            },
+            selectItem() {
+                this.filterValue = this.filterValue;
+                console.log('i m pressed ' + this.filterValue);
+                this.getLogs();
             }
         },
         mounted() {

@@ -11,13 +11,13 @@ class AjaxHandler
         // You will get the db as ninja_error_logger_app()->db()
         // the db() function is almost same as laravel query builder
 
-        $searchInput  = isset($_POST['search'])?$_POST['search']:''; 
+        $searchInput  = isset($_REQUEST['search'])?$_REQUEST['search']:''; 
         $searchInput  = sanitize_text_field($searchInput);
 
-        $filter_data  = isset($_POST['select_filter'])?$_POST['select_filter']:''; 
+        $filter_data  = isset($_REQUEST['select_filter'])?$_REQUEST['select_filter']:''; 
         $filter_data  = sanitize_text_field($filter_data);
 
-        $value        = isset($_POST['value'])?absint($_POST['value']):0;
+        $value        = isset($_REQUEST['value'])?absint($_REQUEST['value']):0;
         $perPage      = isset($_REQUEST['per_page_total'])?absint($_REQUEST['per_page_total']):5;
 
         $error_levels = GeneralSettings::$error_levels;
@@ -49,7 +49,7 @@ class AjaxHandler
             'logs' => $logs,
             'selectinput' => $filter_data,
             'searchdata'  => $searchInput,
-            'error_levels' => $error_levels[$filter_data],
+            'error_levels' => $error_levels,
             'errors' => $error_levels,
             'success' => 'two data find successfully',
             'total' => $total,
@@ -79,7 +79,7 @@ class AjaxHandler
             $this->sendSuccess([
                 'logs' => $logs,
                 'searchdata' => $filter_data,
-                'error_levels' => $error_levels[$filter_data],
+                'error_levels' => $error_levels,
                 'errors' => $error_levels,
                 'success' => 'filter data find successfully',
                 'total' => $total,
