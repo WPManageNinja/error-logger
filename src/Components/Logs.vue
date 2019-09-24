@@ -1,12 +1,16 @@
 <template>
     <div>
         <el-row>
-            <el-col>
+            <!-- <el-col>
+                <router-link to="/logs">All ( {{total_logs}} )</router-link>
+                || <router-link to="/notification-settings">Trashed ( {{trashed_total_logs}} )</router-link>
+            </el-col> -->
+            <el-col class="filter-bulk-action">
                 <el-form>
                     <el-col :span="7" style="display:inline-block;">
                         <el-select v-model="optionValue" placeholder="Bulk Actions">
                             <el-option key="bulk" label="Bulk Actions" value="bulk"></el-option>
-                            <el-option key="delete" label="Delete Logs" value="delete"></el-option>
+                            <el-option key="delete" label="Delete Permanently" value="delete"></el-option>
                         </el-select>
                         <el-button type="primary" @click.prevent="doAction()">Apply</el-button>
                     </el-col>
@@ -18,7 +22,7 @@
                                 </el-select>
                             </el-form-item>
                         </el-col>
-                        <el-col :span="10">
+                        <el-col :span="12">
                             <el-form-item>
                                 <el-input placeholder="Search in logs" prefix-icon="el-icon-search" @keyup.enter.native="searchData()" v-model="input_search"></el-input>
                                 <!-- <input placeholder="Search in logs" @keyup="searchData" v-model="input_search" /> -->
@@ -107,6 +111,10 @@
         float: right;
     }
 
+    .filter-bulk-action{
+        margin-top:10px;
+    },
+
     .item-type{
         margin-right: 5px;
     }
@@ -126,9 +134,11 @@
         name: 'error_log_logs',
         data() {
             return {
+                tabPosition: 'top',
                 input_search: '',
                 logs: [],
                 total_logs: 0,
+                trashed_total_logs: 0,
                 per_page_item: 5,
                 page: 1,
                 pageSizes: [5, 10, 20, 30, 40, 50, 100, 200],
@@ -168,6 +178,9 @@
             }
         },
         methods: {
+            onTabClick() {
+                console.log('clicked');
+            },
             getLogs() {
                 this.loading = true;
                 console.log('i am now getlogs ' + this.per_page_item);
